@@ -14,10 +14,7 @@ import java.util.List;
 
 public class Parser {
     private Logger logger = LoggerFactory.getLogger(Parser.class);
-/*
-ResultSet rs = Mockito.mock(ResultSet.class);
-Mockito.when(rs.next()).thenReturn(true);
- */
+
     public List<Student> getStudentList(ResultSet resultSet, Connection connection) {
         logger.info("start method getStudentList");
         ArrayList<Student> list = new ArrayList<>();

@@ -6,7 +6,9 @@
 	http://www.springframework.org/schema/context
 	http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-
+    <bean class="ua.shalimov.institutemanager.service.InstituteServiceImplementation"
+          id="instituteServiceImplementation">
+    </bean>
 
     <bean class="ua.shalimov.institutemanager.dao.DataAccess" id="dataAccess"/>
 
