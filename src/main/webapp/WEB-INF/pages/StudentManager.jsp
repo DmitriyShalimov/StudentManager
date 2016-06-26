@@ -94,6 +94,10 @@
     </select>
     <br>
     <a class="btn btn-primary btn-smt" id="btnShowGroup">Show all students from selected group</a>
+
+    <a class="btn btn-primary btn-smt" href="<c:url value="/studentManager?id=sortByName"/>">Sort By First Name</a>
+    <a class="btn btn-primary btn-smt" href="<c:url value="/studentManager?id=sortByLastName"/>">Sort By Last Name</a>
+    <a class="btn btn-primary btn-smt" href="<c:url value="/studentManager?id=sortByFullName"/>">Sort By Full Name</a>
     <br><br>
     <table class="table table-hover" cellpadding="10">
         <tr>

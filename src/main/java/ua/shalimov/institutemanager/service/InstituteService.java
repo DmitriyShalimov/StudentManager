@@ -2,9 +2,15 @@ package ua.shalimov.institutemanager.service;
 
 import ua.shalimov.institutemanager.entity.Group;
 import ua.shalimov.institutemanager.entity.Student;
+
 import java.util.List;
 
 public interface InstituteService {
+
+    public List<Student> getSortAllStudents(String id);
+
+    public List<Group> getSortAllGroup(String id);
+
     public List<Student> getAllStudents();
 
     List<Student> getAllStudentsFromGroup(String title);

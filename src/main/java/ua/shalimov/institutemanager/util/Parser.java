@@ -5,18 +5,16 @@ import org.slf4j.LoggerFactory;
 import ua.shalimov.institutemanager.entity.Group;
 import ua.shalimov.institutemanager.entity.Student;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
-    private Logger logger = LoggerFactory.getLogger(Parser.class);
+    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
-    public List<Student> getStudentList(ResultSet resultSet, Connection connection) {
-        logger.info("start method getStudentList");
+    public List<Student> getStudentList(ResultSet resultSet) {
+        logger.info("get student list");
         ArrayList<Student> list = new ArrayList<>();
         try {
             while (resultSet.next()) {
@@ -24,23 +22,6 @@ public class Parser {
                 student.setId(resultSet.getInt("student_id"));
                 student.setFirstName(resultSet.getString("first_name"));
                 student.setLastName(resultSet.getString("last_name"));
-                try {
-                    PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("get_all_students_group"));
-                    preparedStatement.setInt(1, student.getId());
-                    preparedStatement.execute();
-                    ResultSet tempResultSet = preparedStatement.getResultSet();
-                    List<Group> listGroup = new ArrayList<>();
-                    while (tempResultSet.next()) {
-                        String title = tempResultSet.getString("title");
-                        int id = tempResultSet.getInt("group_id");
-                        Group group = new Group(id, title);
-                        listGroup.add(group);
-                    }
-                    student.setListGroup(listGroup);
-
-                } catch (SQLException e) {
-                    logger.error("method getStudentList:", e);
-                }
                 list.add(student);
             }
         } catch (SQLException e) {
@@ -50,7 +31,7 @@ public class Parser {
     }
 
     public List<Group> getGroupList(ResultSet resultSet) {
-        logger.info("start method getGroupList");
+        logger.info("get group list");
         ArrayList<Group> list = new ArrayList<>();
         try {
             while (resultSet.next()) {

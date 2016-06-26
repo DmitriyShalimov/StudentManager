@@ -1,9 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>group manager</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-widh, initial-scale=1.0">
+    <title>Add new group</title>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet"
@@ -12,33 +14,19 @@
 
     <script>
         $(document).ready(function () {
-
-            // if on one of find by pages pre-populate select box
             if (window.location.pathname.indexOf('/pageFindBy') !== -1) {
                 $('#findStudentBy')[0].value = window.location.pathname;
             }
-
-            // highlight active tab in primary nav
-            $('.Menu a').map(function (index, element) {
+             $('.Menu a').map(function(index, element) {
                 if (element.pathname === window.location.pathname) {
                     $(element).addClass('active');
                 } else {
                     $(element).removeClass('active');
                 }
-                // console.log(element.pathname, window.location.pathname);
-                return null;
+                 return null;
             });
 
-            // event handler for dropdown filtering students by group
-            $('#btnShowGroup').click(function () {
-                location.href = "/StudentManager?id=" + $('#inpGroup')[0].value;
-            });
-
-            // /pageFindById
-            // /pageFindByName
-            // /pageFindByLastName
-            // /pageFindByNameLastName
-            $('#findStudentBy').change(function (e) {
+            $('#findStudentBy').change(function(e) {
                 if (window.location.pathname !== $('#findStudentBy')[0].value) {
                     location.href = $('#findStudentBy')[0].value;
                 }
@@ -67,11 +55,6 @@
             width: 120px;
         }
 
-        #container .table {
-            width: 500px;
-            margin: 0px auto;
-        }
-
     </style>
 </head>
 <body>
@@ -84,7 +67,7 @@
 
         <label>Find student by: </label>
         <select id="findStudentBy" class="form-control form-control-sm">
-            <option value=""></option>
+            <option value=""> </option>
             <option value="/findById">Id</option>
             <option value="/findByName">First Name</option>
             <option value="/findByLastName">Last Name</option>
@@ -92,24 +75,26 @@
         </select>
     </div>
     <br><br>
-    <table class="table table-hover" cellpadding="10">
-        <tr>
-            <th>Id</th>
-            <th>Title</th>
-            <th></th>
-        </tr>
-        <c:forEach items="${allGroup}" var="Group">
-            <tr>
-                <td><c:out value="${Group.getId()}"/></td>
-                <td><c:out value="${Group.getTitle()}"/></td>
-                <td>
-                    <a class="btn btn-primary btn-xs" href="/editGroup?id=${Group.getId()}">Edit</a>
-                    <a class="btn btn-primary btn-xs" href="/deleteGroup?id=${Group.getId()}">Delete</a>
-                </td>
-            </tr>
-        </c:forEach>
-    </table>
+
+    <h1>New Group</h1>
+    <br><br>
+
+    <form class="form-horizontal" action="/addNewGroup" method="post">
+        <div class="form-group">
+            <label for="inputTitle" class="col-sm-2 control-label">Title</label>
+
+            <div class="col-sm-10">
+                <input type="text" name="title" class="form-control" id="inputTitle" placeholder="Title">
+            </div>
+        </div>
+        <br><br>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </form>
 </div>
 </body>
 </html>
-

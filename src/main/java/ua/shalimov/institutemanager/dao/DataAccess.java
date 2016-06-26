@@ -10,18 +10,20 @@ import ua.shalimov.institutemanager.util.PropertiesParser;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataAccess {
 
-    private Logger logger = LoggerFactory.getLogger(DataAccess.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataAccess.class);
     private Parser parser = new Parser();
 
     @Autowired
     private DataSource dataSource;
 
     public List<Student> getAllStudents() {
-        logger.info("start method getAllStudents");
+        logger.info("method getAllStudents");
+        List<Student> studentList;
         Connection connection;
         try {
             connection = dataSource.getConnection();
@@ -29,7 +31,27 @@ public class DataAccess {
                 Statement statement = connection.createStatement();
                 statement.execute(PropertiesParser.getSQL("get_all_student"));
                 ResultSet resultSet = statement.getResultSet();
-                return parser.getStudentList(resultSet, connection);
+                studentList = parser.getStudentList(resultSet);
+                for (Student student : studentList) {
+                    try {
+                        PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("get_all_students_group"));
+                        preparedStatement.setInt(1, student.getId());
+                        preparedStatement.execute();
+                        ResultSet tempResultSet = preparedStatement.getResultSet();
+                        List<Group> listGroup = new ArrayList<>();
+                        while (tempResultSet.next()) {
+                            String title = tempResultSet.getString("title");
+                            int id = tempResultSet.getInt("group_id");
+                            Group group = new Group(id, title);
+                            listGroup.add(group);
+                        }
+                        student.setListGroup(listGroup);
+
+                    } catch (SQLException e) {
+                        logger.error("get all students group:", e);
+                    }
+                }
+                return studentList;
             } else {
                 logger.error("Failed to connect");
             }
@@ -39,28 +61,7 @@ public class DataAccess {
         return null;
     }
 
-    public List<Student> getAllStudentsFromGroup(String title) {
-        logger.info("start method getAllStudentsFromGroup");
-        Connection connection;
-        try {
-            connection = dataSource.getConnection();
-            if (connection != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("get_all_students_from_group"));
-                preparedStatement.setString(1, title);
-                preparedStatement.execute();
-                ResultSet resultSet = preparedStatement.getResultSet();
-                return parser.getStudentList(resultSet, connection);
-            } else {
-                logger.error("Failed to connect");
-            }
-        } catch (SQLException e) {
-            logger.error("method getAllStudentsFromGroup:", e);
-        }
-        return null;
-    }
-
     public List<Group> getAllGroup() {
-        logger.info("start method getAllGroup");
         Connection connection;
         try {
             connection = dataSource.getConnection();
@@ -79,7 +80,7 @@ public class DataAccess {
     }
 
     public void addNewStudent(String firstName, String lastName) {
-        logger.info("start method addNewStudent");
+        logger.info("add student. firstName={} lastName={}", firstName, lastName);
         Connection connection;
         try {
             connection = dataSource.getConnection();
@@ -98,7 +99,7 @@ public class DataAccess {
 
     public void addNewGroup(String title) {
         Connection connection;
-        logger.info("start method addNewGroup");
+        logger.info("add group. title={}", title);
         try {
             connection = dataSource.getConnection();
             if (connection != null) {
@@ -113,111 +114,9 @@ public class DataAccess {
         }
     }
 
-    public List<Student> findById(int id) {
-        logger.info("start method findById");
-        Connection connection;
-        try {
-            connection = dataSource.getConnection();
-            if (connection != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("find_by_id"));
-                preparedStatement.setInt(1, id);
-                preparedStatement.execute();
-                ResultSet resultSet = preparedStatement.getResultSet();
-                return parser.getStudentList(resultSet, connection);
-            } else {
-                logger.error("Failed to connect");
-            }
-        } catch (SQLException e) {
-            logger.error("method findById:", e);
-        }
-        return null;
-    }
-
-    public List<Group> findGroupById(int id) {
-        logger.info("findGroupById");
-        Connection connection;
-        try {
-            connection = dataSource.getConnection();
-            if (connection != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("find_group_by_id"));
-                preparedStatement.setInt(1, id);
-                preparedStatement.execute();
-                ResultSet resultSet = preparedStatement.getResultSet();
-                return parser.getGroupList(resultSet);
-            } else {
-                logger.error("Failed to connect");
-            }
-        } catch (SQLException e) {
-            logger.error("method findGroupById:", e);
-        }
-        return null;
-    }
-
-    public List<Student> findByNameLastName(String firstName, String lastName) {
-        logger.info("start method findByNameLastName");
-        Connection connection;
-        try {
-            connection = dataSource.getConnection();
-            if (connection != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("find_by_name_last_name"));
-                preparedStatement.setString(1, firstName);
-                preparedStatement.setString(2, lastName);
-                preparedStatement.execute();
-                ResultSet resultSet = preparedStatement.getResultSet();
-                return parser.getStudentList(resultSet, connection);
-            } else {
-                logger.error("Failed to connect");
-            }
-        } catch (SQLException e) {
-            logger.error("method findByNameLastName:", e);
-        }
-        return null;
-    }
-
-    public List<Student> findByName(String firstName) {
-        logger.info("start method findByName");
-        Connection connection;
-
-        try {
-            connection = dataSource.getConnection();
-            if (connection != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("find_by_name"));
-                preparedStatement.setString(1, firstName);
-                preparedStatement.execute();
-                ResultSet resultSet = preparedStatement.getResultSet();
-                return parser.getStudentList(resultSet, connection);
-            } else {
-                logger.error("Failed to connect");
-            }
-        } catch (SQLException e) {
-            logger.error("method findByNameLastName:", e);
-        }
-        return null;
-    }
-
-    public List<Student> findByLastName(String lastName) {
-        logger.info("start method findByName");
-        Connection connection;
-        try {
-            connection = dataSource.getConnection();
-            if (connection != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(PropertiesParser.getSQL("find_by_last_name"));
-                preparedStatement.setString(1, lastName);
-                preparedStatement.execute();
-                ResultSet resultSet = preparedStatement.getResultSet();
-                return parser.getStudentList(resultSet, connection);
-            } else {
-                logger.error("Failed to connect");
-            }
-        } catch (SQLException e) {
-            logger.error("method findByLastName:", e);
-        }
-        return null;
-    }
-
     public void deleteStudent(int studentId) {
         Connection connection;
-        logger.info("start method deleteStudent");
+        logger.info("delete student. id={}", studentId);
         try {
             connection = dataSource.getConnection();
             if (connection != null) {
@@ -236,7 +135,7 @@ public class DataAccess {
     }
 
     public void deleteGroup(int group_id) {
-        logger.info("start method deleteGroup");
+        logger.info("delete group. id={}", group_id);
         Connection connection;
         try {
             connection = dataSource.getConnection();
@@ -257,7 +156,7 @@ public class DataAccess {
 
     public void editStudent(Student student) {
         Connection connection;
-        logger.info("start method editStudent");
+        logger.info("Edit student. id={},firstName={} lastName={}", student.getId(), student.getFirstName(), student.getLastName());
         try {
             connection = dataSource.getConnection();
             if (connection != null) {
@@ -275,7 +174,7 @@ public class DataAccess {
     }
 
     public void editGroup(Group group) {
-        logger.info("start method editGroup");
+        logger.info("Edit group. id={},title={}", group.getId(), group.getTitle());
         Connection connection;
         try {
             connection = dataSource.getConnection();
@@ -293,7 +192,7 @@ public class DataAccess {
     }
 
     public void changeStudentsGroups(String[] groupTitle, int studentId) {
-        logger.info("start changeStudentsGroups");
+        logger.info("change student groups id={}", studentId);
         Connection connection;
         try {
             connection = dataSource.getConnection();

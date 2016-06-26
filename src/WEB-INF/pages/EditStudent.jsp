@@ -1,43 +1,29 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html" pageEncoding="UTF-8" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>group manager</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Edit student</title>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet"
           href="<c:url value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>"/>
 
-
     <script>
         $(document).ready(function () {
-
-            // if on one of find by pages pre-populate select box
             if (window.location.pathname.indexOf('/pageFindBy') !== -1) {
                 $('#findStudentBy')[0].value = window.location.pathname;
             }
 
-            // highlight active tab in primary nav
             $('.Menu a').map(function (index, element) {
                 if (element.pathname === window.location.pathname) {
                     $(element).addClass('active');
                 } else {
                     $(element).removeClass('active');
                 }
-                // console.log(element.pathname, window.location.pathname);
                 return null;
             });
 
-            // event handler for dropdown filtering students by group
-            $('#btnShowGroup').click(function () {
-                location.href = "/StudentManager?id=" + $('#inpGroup')[0].value;
-            });
-
-            // /pageFindById
-            // /pageFindByName
-            // /pageFindByLastName
-            // /pageFindByNameLastName
             $('#findStudentBy').change(function (e) {
                 if (window.location.pathname !== $('#findStudentBy')[0].value) {
                     location.href = $('#findStudentBy')[0].value;
@@ -67,11 +53,6 @@
             width: 120px;
         }
 
-        #container .table {
-            width: 500px;
-            margin: 0px auto;
-        }
-
     </style>
 </head>
 <body>
@@ -92,24 +73,57 @@
         </select>
     </div>
     <br><br>
-    <table class="table table-hover" cellpadding="10">
-        <tr>
-            <th>Id</th>
-            <th>Title</th>
-            <th></th>
-        </tr>
+
+    <h1>Edit student</h1>
+    <br><br>
+
+    <form class="form-horizontal" action="/editStudent" method="post">
+        <input type="hidden" name="id" value="${getStudentById.get(0).getId()}">
+
+        <div class="form-group">
+            <label for="inputFirstName" class="col-sm-2 control-label">First Name</label>
+
+            <div class="col-sm-10">
+                <input type="text" name="firstName" class="form-control input-sm" id="inputFirstName"
+                       value="${getStudentById.get(0).getFirstName()}">
+            </div>
+        </div>
+        <br><br>
+
+        <div class="form-group">
+            <label for="inputLastName" class="col-sm-2 control-label">Last Name</label>
+
+            <div class="col-sm-10">
+                <input type="text" name="lastName" class="form-control input-sm" id="inputLastName"
+                       value="${getStudentById.get(0).getLastName()}">
+            </div>
+        </div>
+        <br><br>
+
+        <h3></h3>
+
+        <h3>Select group</h3>
         <c:forEach items="${allGroup}" var="Group">
-            <tr>
-                <td><c:out value="${Group.getId()}"/></td>
-                <td><c:out value="${Group.getTitle()}"/></td>
-                <td>
-                    <a class="btn btn-primary btn-xs" href="/editGroup?id=${Group.getId()}">Edit</a>
-                    <a class="btn btn-primary btn-xs" href="/deleteGroup?id=${Group.getId()}">Delete</a>
-                </td>
-            </tr>
+            <label name="title" class="checkbox-inline">
+                <input type="checkbox" name="groupId" value="${Group.getId()}"
+                        <c:set var="contains" value="false"/>
+                        <c:forEach var="item" items="${getStudentById.get(0).getListGroup()}">
+                            <c:if test="${item eq Group.getTitle()}">
+                                <c:set var="contains" value="true"/>
+                            </c:if>
+                        </c:forEach>
+                       <c:if test="${contains == true}">checked="checked"</c:if>
+                        /> ${Group.getTitle()}
+            </label>
         </c:forEach>
-    </table>
+        <br><br>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </form>
 </div>
 </body>
 </html>
-

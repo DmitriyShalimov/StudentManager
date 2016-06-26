@@ -13,27 +13,30 @@ import ua.shalimov.institutemanager.service.InstituteService;
 
 @Controller
 public class GroupController {
-    private Logger logger = LoggerFactory.getLogger(GroupController.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
     @Autowired
     private InstituteService instituteService;
 
     @RequestMapping(value = "/groupManager", method = RequestMethod.GET)
-    public String groupManager(ModelMap model) {
-        logger.info("start method groupManager");
-        model.addAttribute("allGroup", instituteService.getAllGroup());
+    public String groupManager(@RequestParam(value = "id", required = false) String id, ModelMap model) {
+        if (id == null) {
+            model.addAttribute("allGroup", instituteService.getAllGroup());
+        } else {
+            model.addAttribute("allGroup", instituteService.getSortAllGroup(id));
+        }
         return "GroupManager";
     }
 
     @RequestMapping(value = "/editGroup", method = RequestMethod.GET)
     public String editGroup(@RequestParam int id, ModelMap model) {
-        logger.info("start method editGroup");
+        logger.info("Edit group. id={}", id);
         model.addAttribute("getGroupById", instituteService.findGroupById(id));
         return "EditGroup";
     }
 
     @RequestMapping(value = "/editGroup", method = RequestMethod.POST)
     public String editGroup(@RequestParam int id, @RequestParam String title, ModelMap model) {
-        logger.info("start method editGroup");
+        logger.info("Edit group. id={},title={}", id, title);
         if (title.equals("")) {
             model.addAttribute("getGroupById", instituteService.findGroupById(id));
             return "EditGroup";
@@ -48,7 +51,7 @@ public class GroupController {
 
     @RequestMapping(value = "/deleteGroup", method = RequestMethod.GET)
     public String deleteGroup(@RequestParam int id, ModelMap model) {
-        logger.info("start method deleteGroup");
+        logger.info("delete group. id={}", id);
         instituteService.deleteGroup(id);
         model.addAttribute("allStudent", instituteService.getAllStudents());
         model.addAttribute("allGroup", instituteService.getAllGroup());
@@ -57,13 +60,12 @@ public class GroupController {
 
     @RequestMapping(value = "/addNewGroup")
     public String addNewGroup() {
-        logger.info("start method addNewGroup");
         return "AddNewGroup";
     }
 
     @RequestMapping(value = "/addNewGroup", method = RequestMethod.POST)
     public String addNewGroup(@RequestParam String title, ModelMap model) {
-        logger.info("start method addNewGroup");
+        logger.info("add group. title={}", title);
         if (title.equals("")) {
             return "AddNewGroup";
         } else {
