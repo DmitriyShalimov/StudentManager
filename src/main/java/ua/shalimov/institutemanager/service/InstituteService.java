@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface InstituteService {
 
-    public List<Student> getSortAllStudents(String id);
+    public List<Student> getSortAllStudents(String id, String sortId);
 
     public List<Group> getSortAllGroup(String id);
 

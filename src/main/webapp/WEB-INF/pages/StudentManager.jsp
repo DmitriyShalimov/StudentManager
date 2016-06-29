@@ -11,7 +11,6 @@
 
     <script>
         $(document).ready(function () {
-
             if (window.location.pathname.indexOf('/findBy') !== -1) {
                 $('#findStudentBy')[0].value = window.location.pathname;
             }
@@ -27,6 +26,55 @@
 
             $('#btnShowGroup').click(function () {
                 location.href = "/studentManager?id=" + $('#inpGroup')[0].value;
+            });
+
+            $('#btnSortById').click(function () {
+                if (window.location.search != "") {
+                    if (window.location.search.indexOf('sortBy') !== -1) {
+                        window.location.href = window.location.pathname + window.location.search.substring(0, window.location.search.indexOf('&')) + "&sortId=sortById";
+                    } else {
+                        window.location.href = window.location.pathname + window.location.search + "&sortId=sortById";
+                    }
+                } else {
+                    window.location.href = window.location.pathname + "?id=allGroup&sortId=sortById";
+                }
+            });
+
+            $('#btnSortByName').click(function () {
+                if (window.location.search != "") {
+                    if (window.location.search.indexOf('sortBy') !== -1) {
+                        window.location.href = window.location.pathname + window.location.search.substring(0, window.location.search.indexOf('&')) + "&sortId=sortByName";
+                    } else {
+                        window.location.href = window.location.pathname + window.location.search + "&sortId=sortByName";
+                    }
+                } else {
+                    window.location.href = window.location.pathname + "?id=allGroup&sortId=sortByName";
+                }
+            });
+
+            $('#btnSortByLastName').click(function () {
+                if (window.location.search != "") {
+                    if (window.location.search.indexOf('sortBy') !== -1) {
+                        window.location.href = window.location.pathname + window.location.search.substring(0, window.location.search.indexOf('&')) + "&sortId=sortByLastName";
+                    } else {
+                        window.location.href = window.location.pathname + window.location.search + "&sortId=sortByLastName";
+                    }
+                } else {
+                    window.location.href = window.location.pathname + "?id=allGroup&sortId=sortByLastName";
+                }
+            });
+
+            $('#btnSortByFullName').click(function () {
+                if (window.location.search != "") {
+                    if (window.location.search.indexOf('sortBy') !== -1) {
+                        window.location.href = window.location.pathname + window.location.search.substring(0, window.location.search.indexOf('&')) + "&sortId=sortByFullName";
+                    } else {
+
+                        window.location.href = window.location.pathname + window.location.search + "&sortId=sortByFullName";
+                    }
+                } else {
+                    window.location.href = window.location.pathname + "?id=allGroup&sortId=sortByFullName";
+                }
             });
 
             $('#findStudentBy').change(function (e) {
@@ -95,9 +143,11 @@
     <br>
     <a class="btn btn-primary btn-smt" id="btnShowGroup">Show all students from selected group</a>
 
-    <a class="btn btn-primary btn-smt" href="<c:url value="/studentManager?id=sortByName"/>">Sort By First Name</a>
-    <a class="btn btn-primary btn-smt" href="<c:url value="/studentManager?id=sortByLastName"/>">Sort By Last Name</a>
-    <a class="btn btn-primary btn-smt" href="<c:url value="/studentManager?id=sortByFullName"/>">Sort By Full Name</a>
+    <a class="btn btn-primary btn-smt" id="btnSortById">Sort By Id</a>
+    <a class="btn btn-primary btn-smt" id="btnSortByName">Sort By Name</a>
+    <a class="btn btn-primary btn-smt" id="btnSortByLastName">Sort By Last Name</a>
+    <a class="btn btn-primary btn-smt" id="btnSortByFullName">Sort By Full
+        Name</a>
     <br><br>
     <table class="table table-hover" cellpadding="10">
         <tr>
@@ -112,10 +162,20 @@
                 <td><c:out value="${Student.getId()}"/></td>
                 <td><c:out value="${Student.getFirstName()}"/></td>
                 <td><c:out value="${Student.getLastName()}"/></td>
-                <td><c:forEach var="item" items="${Student.getListGroup()}">
-                    <c:out value="${item}"/>
-                </c:forEach>
-
+                <td>
+                    <c:choose>
+                    <c:when test="${Student.getListGroup().size()>'1'}">
+                        <c:forEach var="item" begin="0" end="${(Student.getListGroup().size()-2)}">
+                            <c:out value="${Student.getListGroup().get(item)}, "/>
+                        </c:forEach>
+                        <c:out value="${Student.getListGroup().get(Student.getListGroup().size()-1)}"/>
+                    </c:when>
+                    <c:otherwise>
+                    <c:forEach var="item" items="${Student.getListGroup()}">
+                    <c:out value="${item}"/><p>
+                    </c:forEach>
+                    </c:otherwise>
+                    </c:choose>
                 </td>
                 <td>
                     <a class="btn btn-primary btn-xs" href="/editStudent?id=${Student.getId()}">Edit</a>

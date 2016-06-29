@@ -16,8 +16,8 @@ public class InstituteServiceImplementation implements InstituteService {
     @Autowired
     private DataAccess dataAccess;
 
-    public List<Student> getSortAllStudents(String id) {
-        return instituteCache.sortStudent(id);
+    public List<Student> getSortAllStudents(String id, String sortId) {
+        return instituteCache.sortStudent(id, sortId);
     }
 
     public List<Group> getSortAllGroup(String id) {

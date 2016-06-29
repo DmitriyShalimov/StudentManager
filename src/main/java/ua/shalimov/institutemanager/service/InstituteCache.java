@@ -101,17 +101,23 @@ public class InstituteCache {
         return list;
     }
 
-    public List<Student> sortStudent(String id) {
-        if (id.equals("sortByName")) {
-            Collections.sort(allStudents, (student1, student2) -> student1.getFirstName().compareTo(student2.getFirstName()));
+    public List<Student> sortStudent(String id, String sortId) {
+        List<Student> list;
+        if ((id == null) || id.equals("allGroup")) {
+            list = allStudents;
         } else {
-            if (id.equals("sortByLastName")) {
-                Collections.sort(allStudents, (student1, student2) -> student1.getLastName().compareTo(student2.getLastName()));
+            list = getAllStudentsFromGroup(id);
+        }
+        if (sortId.equals("sortByName")) {
+            Collections.sort(list, (student1, student2) -> student1.getFirstName().compareTo(student2.getFirstName()));
+        } else {
+            if (sortId.equals("sortByLastName")) {
+                Collections.sort(list, (student1, student2) -> student1.getLastName().compareTo(student2.getLastName()));
             } else {
-                if (id.equals("sortById")) {
-                    Collections.sort(allStudents, (student1, student2) -> student1.getId() - student2.getId());
+                if (sortId.equals("sortById")) {
+                    Collections.sort(list, (student1, student2) -> student1.getId() - student2.getId());
                 } else {
-                    Collections.sort(allStudents, (student1, student2) -> {
+                    Collections.sort(list, (student1, student2) -> {
                         if (student1.getLastName().equals(student2.getLastName()))
                             return student1.getFirstName().compareTo(student2.getFirstName());
                         else
@@ -120,10 +126,11 @@ public class InstituteCache {
                 }
             }
         }
-        return allStudents;
+        return list;
     }
 
     public List<Group> sortGroup(String id) {
+
         if (id.equals("sortByTitle")) {
             Collections.sort(allGroup, (group1, group2) -> group1.getTitle().compareTo(group2.getTitle()));
         } else {

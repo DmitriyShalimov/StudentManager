@@ -12,7 +12,7 @@
 
 
     <script>
-           $(document).ready(function () {
+        $(document).ready(function () {
 
             if (window.location.pathname.indexOf('/findBy') !== -1) {
                 $('#findStudentBy')[0].value = window.location.pathname;
@@ -89,7 +89,6 @@
             </div>
         </div>
         <br><br>
-
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

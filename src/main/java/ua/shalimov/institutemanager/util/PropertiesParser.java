@@ -16,7 +16,7 @@ public class PropertiesParser {
         try {
             props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("SQL.properties"));
         } catch (IOException e) {
-            logger.error("method getSQL:",e);
+            logger.error("method getSQL:", e);
         }
         return props.getProperty(name);
     }

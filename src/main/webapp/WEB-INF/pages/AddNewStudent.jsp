@@ -6,12 +6,40 @@
     <meta name="viewport" content="width=device-widh, initial-scale=1.0">
     <title>Add new student</title>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.15.0/jquery.validate.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet"
           href="<c:url value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>"/>
 
     <script>
         $(document).ready(function () {
+
+            $.validator.addMethod(
+                    "doesNotContainWhiteSpace",
+                    function (value, element) {
+                        if (value.indexOf('  ') < 0) {
+                            return true;
+                        }
+                        return false;
+                    },
+                    "Contains multiple whitespace chars"
+            );
+
+            $("#loginform").validate({
+                rules: {
+                    firstName: {required: true, minlength: 3, doesNotContainWhiteSpace: true},
+                    lastName: {required: true, minlength: 3, doesNotContainWhiteSpace: true}
+                },
+                messages: {
+                    firstName: {
+                        minlength: "Enter at least 3 characters ."
+                    },
+                    lasttName: {
+                        minlength: "Enter at least 3 characters ."
+                    }
+                }
+            });
+
             if (window.location.pathname.indexOf('/pageFindBy') !== -1) {
                 $('#findStudentBy')[0].value = window.location.pathname;
             }
@@ -77,7 +105,7 @@
     <h1>New Student</h1>
     <br><br>
 
-    <form class="form-horizontal" action="/addNewStudent" method="post">
+    <form class="form-horizontal" id="loginform" name="loginform" action="/addNewStudent" method="post">
         <div class="form-group">
             <label for="inputFirstName" class="col-sm-2 control-label">Name</label>
 

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-widh, initial-scale=1.0">
     <title>Add new group</title>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.15.0/jquery.validate.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet"
           href="<c:url value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>"/>
@@ -14,23 +15,51 @@
 
     <script>
         $(document).ready(function () {
+
+            $.validator.addMethod(
+                    "doesNotContainWhiteSpace",
+                    function (value, element) {
+                        if (value.indexOf('  ') < 0) {
+                            return true;
+                        }
+                        return false;
+                    },
+                    "Contains multiple whitespace chars"
+            );
+
+            $("#loginform").validate({
+                rules: {
+                    title: {
+                        required: true,
+                        minlength: 3,
+                        doesNotContainWhiteSpace: true
+                    },
+                    messages: {
+                        title: {
+                            minlength: "Enter at least 3 characters ."
+                        }
+                    }
+                }
+            });
+
             if (window.location.pathname.indexOf('/pageFindBy') !== -1) {
                 $('#findStudentBy')[0].value = window.location.pathname;
             }
-             $('.Menu a').map(function(index, element) {
+            $('.Menu a').map(function (index, element) {
                 if (element.pathname === window.location.pathname) {
                     $(element).addClass('active');
                 } else {
                     $(element).removeClass('active');
                 }
-                 return null;
+                return null;
             });
 
-            $('#findStudentBy').change(function(e) {
+            $('#findStudentBy').change(function (e) {
                 if (window.location.pathname !== $('#findStudentBy')[0].value) {
                     location.href = $('#findStudentBy')[0].value;
                 }
             });
+
         });
     </script>
     <style>
@@ -67,7 +96,7 @@
 
         <label>Find student by: </label>
         <select id="findStudentBy" class="form-control form-control-sm">
-            <option value=""> </option>
+            <option value=""></option>
             <option value="/findById">Id</option>
             <option value="/findByName">First Name</option>
             <option value="/findByLastName">Last Name</option>
@@ -79,7 +108,7 @@
     <h1>New Group</h1>
     <br><br>
 
-    <form class="form-horizontal" action="/addNewGroup" method="post">
+    <form class="form-horizontal" id="loginform" name="loginform" action="/addNewGroup" method="post">
         <div class="form-group">
             <label for="inputTitle" class="col-sm-2 control-label">Title</label>
 

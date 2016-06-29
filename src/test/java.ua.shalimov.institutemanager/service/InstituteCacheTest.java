@@ -83,7 +83,4 @@ public class InstituteCacheTest {
         assertThat(cache.findGroupById(1).get(0), is(group1));
         assertThat(cache.findGroupById(2).get(0), is(group2));
     }
-
-    public void testMethodSortStudentByName() {
-    }
 }
