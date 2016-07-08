@@ -7,6 +7,10 @@ public class Group {
     public Group() {
     }
 
+    public Group(int id) {
+        this.id = id;
+    }
+
     public Group(int id, String title) {
         this.id = id;
         this.title = title;
@@ -30,6 +34,9 @@ public class Group {
 
     @Override
     public String toString() {
-        return title;
+        return "Group{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                '}';
     }
 }

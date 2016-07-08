@@ -1,29 +1,10 @@
-package ua.shalimov.institutemanager.entity;
+package ua.shalimov.institutemanager.controller.dto;
 
-import java.util.List;
-
-public class Student {
+public class StudentWithGroupNameDto {
     private int id;
     private String firstName;
     private String lastName;
-    private List<Group> groups;
-
-    public Student(int id, String firstName, String lastName) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
-    public Student() {
-    }
-
-    public List<Group> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<Group> groups) {
-        this.groups = groups;
-    }
+    private String groups;
 
     public int getId() {
         return id;
@@ -49,13 +30,21 @@ public class Student {
         this.lastName = lastName;
     }
 
+    public String getGroups() {
+        return groups;
+    }
+
+    public void setGroups(String groups) {
+        this.groups = groups;
+    }
+
     @Override
     public String toString() {
-        return "Student{" +
+        return "StudentWithGroupNameDto{" +
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", groups=" + groups +
+                ", groups='" + groups + '\'' +
                 '}';
     }
 }

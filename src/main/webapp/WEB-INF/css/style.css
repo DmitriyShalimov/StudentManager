@@ -1,0 +1,53 @@
+
+
+    .block2 {
+        padding-left: 100px;
+    }
+    /* цвет фона и рамки навигационного меню */
+    /*.navbar-default {*/
+        /*background-color: #2ecc71;*/
+        /*border-color: #27ae60;*/
+    /*}*/
+    /* цвет текста, содержащий название сайта или бренда */
+    .navbar-default .navbar-brand {
+        color: #27ae60;
+    }
+    /*!* цвет текста (название сайта или бренда), при поднесении к нему курсора мышки или при его нахождении в фокусе *!*/
+    /*.navbar-default .navbar-brand:hover,*/
+    /*.navbar-default .navbar-brand:focus {*/
+        /*color: #d1ffed;*/
+    /*}*/
+    /*!* Цвет пунктов навигационного меню *!*/
+    /*.navbar-default .navbar-nav > li > a {*/
+        /*color: #ecf0f1;*/
+    /*}*/
+    /* Цвет пункта меню, при поднесении к нему курсора мышки или при его нахождении в фокусе */
+    .navbar-default .navbar-nav > li > a:hover,
+    .navbar-default .navbar-nav > li > a:focus {
+        color: #d1ffed;
+    }
+
+    .navbar-default .navbar-nav > .active > a:hover,
+    .navbar-default .navbar-nav > .active > a:focus {
+        color: #d1ffed;
+        background-color: #27ae60;
+    }
+    .btncolor{
+        background-color: #2ecc71;
+        color: #ecf0f1;
+    }
+    .tblcolor{
+        background-color: #E6FFEE;
+        color:  #005D1D;
+    }
+    .fieldsize{
+        width: 300px;
+    }
+    .btnsize{
+        width: 180px;
+        height: 40px;
+        padding-bottom: 10px;
+        font-size:25px;
+        margin-left: auto;
+    }
+

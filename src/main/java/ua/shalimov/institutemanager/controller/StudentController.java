@@ -3,152 +3,122 @@ package ua.shalimov.institutemanager.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import ua.shalimov.institutemanager.entity.SortType;
+import ua.shalimov.institutemanager.service.parser.JsonParser;
+import ua.shalimov.institutemanager.controller.dto.transformer.DtoTransformer;
 import ua.shalimov.institutemanager.entity.Student;
-import ua.shalimov.institutemanager.service.InstituteService;
+import ua.shalimov.institutemanager.service.GroupService;
+import ua.shalimov.institutemanager.service.StudentService;
+
+import java.util.List;
 
 @Controller
 public class StudentController {
-
-    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StudentController.class);
 
     @Autowired
-    private InstituteService instituteService;
+    private StudentService studentService;
 
-    @RequestMapping(value = "/studentManager", method = RequestMethod.GET)
-    public String showAll(@RequestParam(value = "id", required = false) String id, @RequestParam(value = "sortId", required = false) String sortId, ModelMap model) {
-        logger.info("show student from group. id={}", id);
+    @Autowired
+    private GroupService groupService;
 
-        if ((id == null) || id.equals("allGroup")) {
-            model.addAttribute("allStudent", instituteService.getAllStudents());
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-        } else {
-            if ((sortId != null) && (sortId.contains("sortBy"))) {
-                model.addAttribute("allStudent", instituteService.getSortAllStudents(id, sortId));
-                model.addAttribute("allGroup", instituteService.getAllGroup());
-            } else {
-                model.addAttribute("allStudent", instituteService.getAllStudentsFromGroup(id));
-                model.addAttribute("allGroup", instituteService.getAllGroup());
-            }
-        }
-        return "StudentManager";
+    @RequestMapping("/students")
+    public String showAllStudents(@RequestParam(value = "sortType", required = false) SortType sortType, ModelMap model) {
+        LOGGER.info("Start obtaining all students");
+        long startTime = System.currentTimeMillis();
+        List<Student> students = studentService.getAll();
+        model.addAttribute("students", DtoTransformer.convert(studentService.sort(sortType, students)));
+        model.addAttribute("allGroups", groupService.getAll());
+        LOGGER.info("Students were obtained. Their amount = {}. It took {} ms", students.size(), System.currentTimeMillis() - startTime);
+        return "students";
     }
 
-    @RequestMapping(value = "/editStudent")
-    public String editStudent(@RequestParam int id, ModelMap model) {
-        logger.info("Edit student. id={}", id);
-        model.addAttribute("getStudentById", instituteService.findStudentById(id));
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "EditStudent";
+    @RequestMapping(value = "/students/group/{id}")
+    public String showAllStudentsFromGroup(@RequestParam(value = "sortType", required = false) SortType sortType, @PathVariable int id, ModelMap model) {
+        LOGGER.info("Start obtaining students from group with id={}", id);
+        long startTime = System.currentTimeMillis();
+        List<Student> students = studentService.getByGroupId(id);
+        model.addAttribute("students", DtoTransformer.convert(studentService.sort(sortType, students)));
+        model.addAttribute("allGroups", groupService.getAll());
+        LOGGER.info("Students for group with id={} were obtained. Their amount = {}. It took {} ms", id, students.size(), System.currentTimeMillis() - startTime);
+        return "students";
     }
 
-    @RequestMapping(value = "/editStudent", method = RequestMethod.POST)
-    public String editStudent(@RequestParam int id, @RequestParam String firstName, @RequestParam String lastName,
-                              @RequestParam(value = "groupId", required = false) String[] groupId, ModelMap model) {
-        logger.info("Edit student. id={},firstName={} lastName={}", id, firstName, lastName);
-        if (firstName.equals("") || (lastName.equals(""))) {
-            model.addAttribute("getStudentById", instituteService.findStudentById(id));
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "EditStudent";
-        } else {
-            Student student = new Student(id, firstName, lastName);
-            instituteService.editStudent(student);
-            instituteService.changeStudentsGroups(groupId, id);
-            model.addAttribute("allStudent", instituteService.getAllStudents());
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "StudentManager";
-        }
+    @RequestMapping(value = "/students/search")
+    public String searchStudentByLastName(@RequestParam(value = "sortType", required = false) SortType sortType, @RequestParam("name") String lastName, ModelMap model) {
+        LOGGER.info("Start searching for students with name={}", lastName);
+        long startTime = System.currentTimeMillis();
+        List<Student> students = studentService.getByName(lastName);
+        model.addAttribute("students", DtoTransformer.convert(students));
+        model.addAttribute("allGroups", groupService.getAll());
+        LOGGER.info("Students with name={} were obtained. Their amount = {}. It took {} ms", lastName, students.size(), System.currentTimeMillis() - startTime);
+        return "students";
     }
 
-    @RequestMapping(value = "/deleteStudent", method = RequestMethod.GET)
-    public String deleteStudent(@RequestParam int id, ModelMap model) {
-        logger.info("delete student. id={}", id);
-        instituteService.deleteStudent(id);
-        model.addAttribute("allStudent", instituteService.getAllStudents());
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "StudentManager";
-    }
-
-    @RequestMapping(value = "/addNewStudent", method = RequestMethod.GET)
+    @RequestMapping("/student/add")
     public String addNewStudent(ModelMap model) {
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "AddNewStudent";
+        LOGGER.info("Start loading page for adding new student");
+        long startTime = System.currentTimeMillis();
+        model.addAttribute("allGroups", groupService.getAll());
+        LOGGER.info("Page for adding new student is loaded. It took {} ms", System.currentTimeMillis() - startTime);
+        return "addStudent";
     }
 
-    @RequestMapping(value = "/addNewStudent", method = RequestMethod.POST)
-    public String addNewStudent(@RequestParam String firstName, @RequestParam String
-            lastName, @RequestParam(value = "groupId", required = false) String[] groupId, ModelMap model) {
-        logger.info("add student. firstName={} lastName={}", firstName, lastName);
-        if (firstName.equals("") || (lastName.equals(""))) {
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "AddNewStudent";
+    @RequestMapping(value = "/student/add", method = RequestMethod.POST)
+    public ResponseEntity addNewStudent(@RequestBody String json) {
+        LOGGER.info("Start adding new student");
+        long startTime = System.currentTimeMillis();
+        Student student = new JsonParser().jsonToStudent(json);
+        if (studentService.validate(student)) {
+            studentService.add(student);
+            LOGGER.info("New student was added. It took {} ms", System.currentTimeMillis() - startTime);
+            return new ResponseEntity(HttpStatus.OK);
         } else {
-            instituteService.addNewStudent(firstName, lastName);
-            int id = instituteService.findByNameLastName(firstName, lastName).get(0).getId();
-            instituteService.changeStudentsGroups(groupId, id);
-            model.addAttribute("allStudent", instituteService.getAllStudents());
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "StudentManager";
+            LOGGER.info("FirstName or lastName not passed validation");
+            return new ResponseEntity(HttpStatus.FAILED_DEPENDENCY);
         }
+
     }
 
-    @RequestMapping(value = "/findById")
-    public String findById() {
-        return "FindById";
+    @RequestMapping(value = "/student/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteStudent(@PathVariable("id") int id) {
+        LOGGER.info("Start deleting student with id={}", id);
+        long startTime = System.currentTimeMillis();
+        studentService.delete(id);
+        LOGGER.info("Student was deleted. It took {} ms", System.currentTimeMillis() - startTime);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/findById", method = RequestMethod.POST)
-    public String findById(@RequestParam String id, ModelMap model) {
-        logger.info("find student. id={}", id);
-        try {
-            model.addAttribute("allStudent", instituteService.findStudentById(Integer.parseInt(id)));
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "StudentManager";
-        } catch (NumberFormatException exception) {
-            return "FindById";
+
+    @RequestMapping("/student/{id}")
+    public String editStudent(@PathVariable("id") int id, ModelMap model) {
+        LOGGER.info("Start loading page for edit student");
+        long startTime = System.currentTimeMillis();
+        model.addAttribute("student", studentService.getById(id));
+        model.addAttribute("allGroups", groupService.getAll());
+        LOGGER.info("Page for edit student is loaded. It took {} ms", System.currentTimeMillis() - startTime);
+        return "editStudent";
+    }
+
+    @RequestMapping(value = "/student/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity editStudent(@RequestBody String json, @PathVariable("id") int id) {
+        LOGGER.info("Start edit student with id={}", id);
+        long startTime = System.currentTimeMillis();
+        Student student = new JsonParser().jsonToStudent(json);
+        if (studentService.validate(student)) {
+            student.setId(id);
+            studentService.edit(student);
+            LOGGER.info("Student was edited. It took {} ms", System.currentTimeMillis() - startTime);
+            return new ResponseEntity(HttpStatus.OK);
+        } else {
+            LOGGER.info("FirstName or lastName not passed validation");
+            return new ResponseEntity(HttpStatus.FAILED_DEPENDENCY);
         }
-    }
-
-    @RequestMapping(value = "/findByNameLastName")
-    public String findByNameLastName() {
-        return "FindByNameLastName";
-    }
-
-    @RequestMapping(value = "/findByNameLastName", method = RequestMethod.POST)
-    public String findByNameLastName(@RequestParam String firstName, @RequestParam String lastName, ModelMap model) {
-        logger.info("find student. firstName={} lastName={}", firstName, lastName);
-        model.addAttribute("allStudent", instituteService.findByNameLastName(firstName, lastName));
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "StudentManager";
-    }
-
-    @RequestMapping(value = "/findByLastName")
-    public String findByLastName() {
-        return "FindByLastName";
-    }
-
-    @RequestMapping(value = "/findByLastName", method = RequestMethod.POST)
-    public String findByLastName(@RequestParam String lastName, ModelMap model) {
-        logger.info("find student. lastName={}", lastName);
-        model.addAttribute("allStudent", instituteService.findByLastName(lastName));
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "StudentManager";
-    }
-
-    @RequestMapping(value = "/findByName")
-    public String findBytName() {
-        return "FindByName";
-    }
-
-    @RequestMapping(value = "/findByName", method = RequestMethod.POST)
-    public String findByName(@RequestParam String firstName, ModelMap model) {
-        logger.info("find student. firstName={}", firstName);
-        model.addAttribute("allStudent", instituteService.findByName(firstName));
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "StudentManager";
     }
 }

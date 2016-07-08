@@ -3,79 +3,83 @@ package ua.shalimov.institutemanager.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import ua.shalimov.institutemanager.service.parser.JsonParser;
 import ua.shalimov.institutemanager.entity.Group;
-import ua.shalimov.institutemanager.service.InstituteService;
+import ua.shalimov.institutemanager.service.GroupService;
 
 @Controller
 public class GroupController {
-    private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupController.class);
+
     @Autowired
-    private InstituteService instituteService;
+    private GroupService groupService;
 
-    @RequestMapping(value = "/groupManager", method = RequestMethod.GET)
-    public String groupManager(@RequestParam(value = "id", required = false) String id, ModelMap model) {
-        if (id == null) {
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-        } else {
-            model.addAttribute("allGroup", instituteService.getSortAllGroup(id));
-        }
-        return "GroupManager";
+    @RequestMapping("/groups")
+    public String showAllGroup(ModelMap model) {
+        LOGGER.info("Start obtaining all groups");
+        long startTime = System.currentTimeMillis();
+        model.addAttribute("allGroups", groupService.getAll());
+        LOGGER.info("Groups were obtained. It took {} ms", System.currentTimeMillis() - startTime);
+        return "groups";
     }
 
-    @RequestMapping(value = "/editGroup", method = RequestMethod.GET)
-    public String editGroup(@RequestParam int id, ModelMap model) {
-        logger.info("Edit group. id={}", id);
-        model.addAttribute("getGroupById", instituteService.findGroupById(id));
-        return "EditGroup";
-    }
-
-    @RequestMapping(value = "/editGroup", method = RequestMethod.POST)
-    public String editGroup(@RequestParam int id, @RequestParam String title, ModelMap model) {
-        logger.info("Edit group. id={},title={}", id, title);
-        if (title.equals("")) {
-            model.addAttribute("getGroupById", instituteService.findGroupById(id));
-            return "EditGroup";
-        } else {
-            Group group = new Group(id, title);
-            instituteService.editGroup(group);
-            model.addAttribute("allStudent", instituteService.getAllStudents());
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "GroupManager";
-        }
-    }
-
-    @RequestMapping(value = "/deleteGroup", method = RequestMethod.GET)
-    public String deleteGroup(@RequestParam int id, ModelMap model) {
-        logger.info("delete group. id={}", id);
-        instituteService.deleteGroup(id);
-        model.addAttribute("allStudent", instituteService.getAllStudents());
-        model.addAttribute("allGroup", instituteService.getAllGroup());
-        return "GroupManager";
-    }
-
-    @RequestMapping(value = "/addNewGroup")
+    @RequestMapping("/group/add")
     public String addNewGroup() {
-        return "AddNewGroup";
+        LOGGER.info("Page for adding new group");
+        return "addGroup";
     }
 
-    @RequestMapping(value = "/addNewGroup", method = RequestMethod.POST)
-    public String addNewGroup(@RequestParam String title, ModelMap model) {
-        logger.info("add group. title={}", title);
-        if (title.equals("")) {
-            return "AddNewGroup";
+    @RequestMapping(value = "/group/add", method = RequestMethod.POST)
+    public ResponseEntity addNewGroup(@RequestBody String json) {
+        LOGGER.info("Start adding new group");
+        long startTime = System.currentTimeMillis();
+        Group group = new JsonParser().jsonToGroup(json);
+        if (groupService.validate(group)) {
+            groupService.add(group);
+            LOGGER.info("New group was added. It took {} ms", System.currentTimeMillis() - startTime);
+            return new ResponseEntity(HttpStatus.OK);
         } else {
-            System.out.println("here");
-            System.out.println(title);
-            System.out.println("title;" + title + "!");
-            instituteService.addNewGroup(title);
-            model.addAttribute("allStudent", instituteService.getAllStudents());
-            model.addAttribute("allGroup", instituteService.getAllGroup());
-            return "GroupManager";
+            LOGGER.info("Title not passed validation");
+            return new ResponseEntity(HttpStatus.FAILED_DEPENDENCY);
+        }
+    }
+
+    @RequestMapping(value = "/group/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteGroup(@PathVariable("id") int id) {
+        LOGGER.info("Start deleting group with id={}", id);
+        long startTime = System.currentTimeMillis();
+        groupService.delete(id);
+        LOGGER.info("Group was deleted. It took {} ms", System.currentTimeMillis() - startTime);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping("/group/{id}")
+    public String editGroup(@PathVariable("id") int id, ModelMap model) {
+        LOGGER.info("Start loading page for edit group");
+        long startTime = System.currentTimeMillis();
+        model.addAttribute("group", groupService.getGroupById(id));
+        LOGGER.info("Page for edit group is loaded. It took {} ms", System.currentTimeMillis() - startTime);
+        return "editGroup";
+    }
+
+    @RequestMapping(value = "/group/{id}", method = RequestMethod.PUT)
+    public ResponseEntity editGroup(@RequestBody String json, @PathVariable("id") int id) {
+        LOGGER.info("Start edit group with id={}", id);
+        long startTime = System.currentTimeMillis();
+        Group group = new JsonParser().jsonToGroup(json);
+        if (groupService.validate(group)) {
+            group.setId(id);
+            groupService.edit(group);
+            LOGGER.info("Group was edited. It took {} ms", System.currentTimeMillis() - startTime);
+            return new ResponseEntity(HttpStatus.OK);
+        } else {
+            LOGGER.info("Title not passed validation");
+            return new ResponseEntity(HttpStatus.FAILED_DEPENDENCY);
         }
     }
 }
